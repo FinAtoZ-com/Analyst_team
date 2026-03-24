@@ -2,33 +2,44 @@
 
 ---
 
-## Section 1: Equity Fund Analysis
+## Section 1: Current Valuation
 
-| Name | Category | Current Value (₹) | Weightage (%) | Sharpe Ratio 3 Yr | Sharpe Ratio 5 Yr | Standard Deviation 3 Yr | Standard Deviation 5 Yr | Tot Ret 3 Yr Annlzd | Tot Ret 5 Yr Annlzd | % Large Cap | % Medium Cap | % Small Cap | Finatoz Ratings | Comments | Final Advisor Recommendation |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| [Fund Name] | [Category] | [Value] | [X.X%] | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] | [X.XX] | [X.XX] | [X.XX] | [Green/Amber/Red] | [Comments] | [Recommendation] |
+| Scheme Name | Current Value (₹) |
+|---|---|
+| [Fund Name 1] | [Value] |
+| [Fund Name 2] | [Value] |
+| [Fund Name 3] | [Value] |
+| **Total** | **[Total Value]** |
+
+---
+
+## Section 2: Equity Fund Analysis
+
+| Name | Category | Current Value (₹) | Weightage (%) | Sharpe Ratio 3 Yr | Sharpe Ratio 5 Yr | Information Ratio 3 Yr | Information Ratio 5 Yr | Standard Deviation 3 Yr | Standard Deviation 5 Yr | Total Return 3 Yr Annlzd (%) | Total Return 5 Yr Annlzd (%) | Large Cap (%) | Mid Cap (%) | Small Cap (%) | FinAtoZ Rating | Comments | Final Advisor Recommendation |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [Fund Name] | [Category] | [Value] | [X.X%] | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] | [X.XX] | [X.XX] | [X.XX] | [Green / Amber / Blue / Red] | [Comments] | [Recommendation] |
 
 **Total: ₹[Total Value] | 100%**
 
 ### Benchmarks
 
-| Benchmark | Category | Sharpe Ratio 3 Yr | Sharpe Ratio 5 Yr | Standard Deviation 3 Yr | Standard Deviation 5 Yr | Tot Ret 3 Yr Annlzd | Tot Ret 5 Yr Annlzd |
-|---|---|---|---|---|---|---|---|
-| S&P BSE 500 India TR INR | Multi Cap | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] |
-| S&P BSE Midcap TR INR | Mid Cap | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] |
-| S&P BSE Smallcap TR INR | Small Cap | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] |
+| Benchmark | Sharpe Ratio 3 Yr | Sharpe Ratio 5 Yr | Standard Deviation 3 Yr | Standard Deviation 5 Yr | Total Return 3 Yr Annlzd (%) | Total Return 5 Yr Annlzd (%) |
+|---|---|---|---|---|---|---|
+| S&P BSE 500 India TR INR | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] |
+| S&P BSE Midcap TR INR | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] |
+| S&P BSE Smallcap TR INR | [X.XX] | [X.XX] | [X.XX] | [X.XX] | [X.XX%] | [X.XX%] |
 
 ---
 
-## Section 2: Debt Fund Analysis
+## Section 3: Debt Fund Analysis
 
-| Name | Average Maturity | Current Value (₹) | Yield to Maturity (%) | Modified Duration | Average Credit Quality | YTM - Expected (%) | Expense Ratio (%) | AAA/A1+ (%) | SOV (%) | Cash (%) | Finatoz Ratings |
+| Name | Average Maturity | Current Value (₹) | Yield to Maturity (%) | Modified Duration | Average Credit Quality | YTM - Expected (%) | Expense Ratio (%) | AAA/A1+ (%) | SOV (%) | Cash (%) | FinAtoZ Ratings |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| [Fund Name] | [X.XX] | [Value] | [X.XX%] | [X.XX] | [AAA/AA/etc.] | [X.XX%] | [X.XX%] | [X.XX] | [X.XX] | [X.XX] | [Green/Amber/Red] |
+| [Fund Name] | [X.XX] | [Value] | [X.XX%] | [X.XX] | [AAA / AA / etc.] | [X.XX%] | [X.XX%] | [X.XX] | [X.XX] | [X.XX] | [Green / Amber / Red] |
 
 ---
 
-## Section 3: Common Holdings (Fund Overlap Matrix)
+## Section 4: Common Holdings (Fund Overlap Matrix)
 
 | # | Fund Name | 1 | 2 | 3 | 4 | 5 |
 |---|---|---|---|---|---|---|
