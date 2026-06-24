@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 from datetime import date, timedelta
 
-RISK_FREE_RATE = 0.065  # 6.5% annual default
+RISK_FREE_RATE = 0.053  # 5.3% annual (90-day treasury bill)
 
 
 def get_last_business_day_of_prev_month():
