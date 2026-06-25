@@ -43,7 +43,7 @@
     <span class="badge bg-light text-dark me-2">mfapi.in</span>
     <span class="badge bg-light text-dark me-2">Monthly NAV returns</span>
     <span class="badge bg-light text-dark me-2">Period-avg RBI repo RFR</span>
-    <span class="badge bg-light text-dark">Auto column detection</span>
+    <span class="badge bg-light text-dark">Portfolio Weights</span>
   </div>
 </div>
 
@@ -57,7 +57,7 @@
         <div class="card-body">
           <p class="text-muted small mb-2">
             <strong>Column A</strong>: Fund name or scheme code (required)<br>
-            <strong>Column B</strong>: Units held (optional — for portfolio weights)<br>
+            <strong>Column B</strong>: Current Value ₹ (optional — for portfolio weights)<br>
             <strong>Other columns</strong>: Any extra data — auto-detected &amp; carried through
           </p>
           <button class="btn btn-outline-secondary btn-sm mb-3" onclick="downloadTemplate()">⬇ Download Template</button>
@@ -98,7 +98,7 @@
               <tr><td>Volatility</td><td>Monthly NAV returns, annualised × √12</td></tr>
               <tr><td>Risk-Free Rate</td><td>Period-average RBI repo rate (monthly lookup table)</td></tr>
               <tr><td>Sharpe Ratio</td><td>(CAGR − Avg RFR) ÷ Annualised Volatility</td></tr>
-              <tr><td>Current Value</td><td>Units Held × Latest NAV (base date)</td></tr>
+              <tr><td>Current Value</td><td>Provided directly in Column B of your Excel (₹)</td></tr>
               <tr><td>Weight</td><td>Fund Current Value ÷ Total Portfolio Value × 100</td></tr>
             </tbody>
           </table>
@@ -227,10 +227,10 @@ let hasUnits     = false;
 let resultsData  = [];
 
 // ─── Column auto-detection ───────────────────────────────────────────────────
-const UNIT_HEADERS = ['units','unit','qty','quantity','units held','no. of units','no of units'];
-const SKIP_ROWS    = ['total','grand total','sub total','subtotal','','net total'];
+const VALUE_HEADERS = ['current value','value','market value','portfolio value','amount','₹','inr','corpus','holding value'];
+const SKIP_ROWS     = ['total','grand total','sub total','subtotal','','net total'];
 
-function isUnitsHeader(h) { return UNIT_HEADERS.includes(String(h||'').toLowerCase().trim()); }
+function isValueHeader(h) { return VALUE_HEADERS.includes(String(h||'').toLowerCase().trim()); }
 function isNumeric(v)     { return v !== '' && v != null && !isNaN(parseFloat(v)); }
 function shouldSkipRow(v) { return SKIP_ROWS.includes(String(v||'').toLowerCase().trim()); }
 
@@ -239,27 +239,27 @@ function detectAndParse(rows) {
   const headers = rows[0].map(h => String(h||'').trim());
 
   // Col A = fund name/code (required)
-  // Col B = units if header matches OR all data values are numeric
+  // Col B = current value if header matches OR all data values are numeric
   const colBHeader = headers[1] || '';
   const colBValues = rows.slice(1).map(r => r[1]).filter(v => v != null && String(v).trim() !== '');
-  const colBIsUnits = isUnitsHeader(colBHeader) || (colBValues.length > 0 && colBValues.every(isNumeric));
+  const colBIsValue = isValueHeader(colBHeader) || (colBValues.length > 0 && colBValues.every(isNumeric));
 
-  hasUnits = colBIsUnits && colBValues.length > 0;
+  hasUnits = colBIsValue && colBValues.length > 0;
 
-  // Extra columns = anything beyond A (and B if it's units)
+  // Extra columns = anything beyond A (and B if it's current value)
   const extraStart = hasUnits ? 2 : 1;
   extraHeaders = headers.slice(extraStart);
 
-  // Filter data rows: skip empty col A, skip total rows
+  // Filter data rows: skip empty col A, skip total/summary rows
   parsedRows = rows.slice(1)
     .filter(r => {
       const v = String(r[0]||'').trim();
       return v !== '' && !shouldSkipRow(v);
     })
     .map(r => ({
-      query:     String(r[0]||'').trim(),
-      units:     hasUnits ? (parseFloat(r[1]) || null) : null,
-      extraCols: r.slice(extraStart).map(v => v ?? ''),
+      query:        String(r[0]||'').trim(),
+      currentValue: hasUnits ? (parseFloat(r[1]) || null) : null,
+      extraCols:    r.slice(extraStart).map(v => v ?? ''),
     }));
 
   // Show detection UI
@@ -267,14 +267,16 @@ function detectAndParse(rows) {
   det.innerHTML =
     `<div class="mb-1 small text-muted">Detected columns:</div>` +
     `<span class="col-badge detected">A: Fund Name/Code</span>` +
-    (hasUnits ? `<span class="col-badge detected">B: Units Held</span>` : `<span class="col-badge">B: (not units — passed through)</span>`) +
+    (hasUnits
+      ? `<span class="col-badge detected">B: Current Value (₹)</span>`
+      : `<span class="col-badge">B: (passed through as-is)</span>`) +
     extraHeaders.map(h=>`<span class="col-badge">${h||'(unnamed)'}</span>`).join('');
 
   const ul = document.getElementById('fund-preview-list');
   ul.innerHTML = parsedRows.map((r,i)=>
     `<li class="list-group-item py-1 d-flex justify-content-between">
        <span>${i+1}. ${r.query}</span>
-       ${r.units!=null ? `<span class="text-muted small">${r.units.toLocaleString('en-IN')} units</span>` : ''}
+       ${r.currentValue!=null ? `<span class="text-muted small">${fmtINR(r.currentValue)}</span>` : ''}
      </li>`
   ).join('');
 }
@@ -301,11 +303,11 @@ function onFileSelected(evt) {
 function downloadTemplate() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet([
-    ['Fund Name / Scheme Code', 'Units Held', 'Investor Name', 'Account No'],
-    ['Parag Parikh Flexi Cap Fund - Regular Plan - Growth', 500, 'John Doe', 'ACC001'],
-    ['Mirae Asset Large Cap Fund',                          1000,'John Doe', 'ACC001'],
-    ['HDFC Mid-Cap Opportunities Fund',                     750, 'John Doe', 'ACC001'],
-    ['122640',                                              200, 'John Doe', 'ACC001'],
+    ['Fund Name / Scheme Code', 'Current Value (₹)', 'Investor Name', 'Account No'],
+    ['Parag Parikh Flexi Cap Fund - Regular Plan - Growth', 150000, 'John Doe', 'ACC001'],
+    ['Mirae Asset Large Cap Fund',                          250000, 'John Doe', 'ACC001'],
+    ['HDFC Mid-Cap Opportunities Fund',                     100000, 'John Doe', 'ACC001'],
+    ['122640',                                               50000, 'John Doe', 'ACC001'],
   ]);
   ws['!cols'] = [{wch:52},{wch:14},{wch:18},{wch:14}];
   XLSX.utils.book_append_sheet(wb, ws, 'Funds');
@@ -313,7 +315,7 @@ function downloadTemplate() {
 }
 
 // ─── Analyse one fund ─────────────────────────────────────────────────────────
-async function analyzeFund(query, units) {
+async function analyzeFund(query, currentValue) {
   let schemeCode, schemeName;
   if (/^\d+$/.test(query)) {
     schemeCode = parseInt(query); schemeName = query;
@@ -339,7 +341,6 @@ async function analyzeFund(query, units) {
   const monthly  = toMonthlyNav(navArr);
   const baseDate = lastBizDayOfPrevMonth();
   const navBase  = nearestNav(navArr, baseDate);
-  const currentValue = (units != null && navBase != null) ? units * navBase : null;
 
   const out = {
     query, schemeName, schemeCode,
@@ -348,7 +349,7 @@ async function analyzeFund(query, units) {
     baseDate: baseDate.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
     navBaseRaw: navBase,
     navBase: navBase!=null ? navBase.toFixed(4) : 'N/A',
-    units, currentValue,
+    currentValue,   // taken directly from Excel — no units × NAV needed
     weight: null,   // filled after all funds done
     y3:{}, y5:{}, error:null
   };
@@ -381,8 +382,7 @@ function buildTableHeader() {
       <th rowspan="2" class="align-middle">Category</th>
       ${extra.map(h=>`<th rowspan="2" class="align-middle">${h||'Extra'}</th>`).join('')}
       ${hasW ? `
-        <th rowspan="2" class="align-middle">Units</th>
-        <th rowspan="2" class="align-middle">Current Value</th>
+        <th rowspan="2" class="align-middle">Current Value (₹)</th>
         <th rowspan="2" class="align-middle">Weight %</th>
       ` : ''}
       <th rowspan="2" class="align-middle">Base NAV</th>
@@ -419,7 +419,6 @@ function appendRow(idx, r, color) {
     <td><span class="badge-cat">${r.category}</span></td>
     ${(r.extraCols||[]).map(v=>`<td class="text-muted">${v}</td>`).join('')}
     ${hasUnits ? `
-      <td>${r.units!=null ? r.units.toLocaleString('en-IN') : '—'}</td>
       <td>${r.currentValue!=null ? fmtINR(r.currentValue) : '—'}</td>
       <td>${wBar}</td>
     ` : ''}
@@ -473,7 +472,7 @@ function buildPortfolioSummary() {
     // find the weight cell (3rd weight-related cell)
     const cells = rows[idx].querySelectorAll('td');
     // weight cell is after extraCols + units + currentValue
-    const weightCellIdx = 2 + (r.extraCols||[]).length + 2;
+    const weightCellIdx = 2 + (r.extraCols||[]).length + 1;
     if (cells[weightCellIdx]) {
       const color = COLORS[idx % COLORS.length];
       cells[weightCellIdx].innerHTML = `
@@ -500,16 +499,16 @@ async function runAnalysis() {
   const status = document.getElementById('status-text');
 
   for (let i=0; i<parsedRows.length; i++) {
-    const { query, units, extraCols } = parsedRows[i];
+    const { query, currentValue, extraCols } = parsedRows[i];
     bar.style.width = Math.round((i/parsedRows.length)*100)+'%';
     status.textContent = `Processing ${i+1}/${parsedRows.length}: ${query}`;
 
     let row;
     try {
-      row = await analyzeFund(query, units);
+      row = await analyzeFund(query, currentValue);
     } catch(e) {
       row = { query, schemeName:query, schemeCode:'—', category:'—', fundHouse:'—',
-              baseDate:'—', navBase:'—', navBaseRaw:null, units, currentValue:null, weight:null,
+              baseDate:'—', navBase:'—', navBaseRaw:null, currentValue, weight:null,
               y3:{cagr:'Error',vol:'—',rfr:'—',sharpe:'—',cagrRaw:null,volRaw:null,rfrRaw:null,sharpeRaw:null},
               y5:{cagr:'Error',vol:'—',rfr:'—',sharpe:'—',cagrRaw:null,volRaw:null,rfrRaw:null,sharpeRaw:null},
               error: e.message };
@@ -533,7 +532,7 @@ async function runAnalysis() {
 function downloadResults() {
   const baseHeaders = ['#','Fund Name','Scheme Code','Category','Fund House','Base Date','Base NAV'];
   const extraH      = extraHeaders.length ? extraHeaders : [];
-  const weightH     = hasUnits ? ['Units Held','Current Value (₹)','Weight (%)'] : [];
+  const weightH     = hasUnits ? ['Current Value (₹)','Weight (%)'] : [];
   const analyticsH  = [
     '3Y CAGR (%)','3Y Volatility (%)','3Y Avg RFR (%)','3Y Sharpe',
     '5Y CAGR (%)','5Y Volatility (%)','5Y Avg RFR (%)','5Y Sharpe'
@@ -547,9 +546,8 @@ function downloadResults() {
     ];
     const extra  = (r.extraCols||[]);
     const weight = hasUnits ? [
-      r.units!=null ? r.units : 'N/A',
       r.currentValue!=null ? +r.currentValue.toFixed(2) : 'N/A',
-      r.weight!=null ? +r.weight.toFixed(4) : 'N/A'
+      r.weight!=null       ? +r.weight.toFixed(4)       : 'N/A'
     ] : [];
     const analytics = [
       r.y3.cagrRaw!=null   ? +(r.y3.cagrRaw*100).toFixed(2)   : 'N/A',
@@ -581,7 +579,7 @@ function downloadResults() {
     ['Methodology',    'Monthly NAV returns, Volatility = Std × √12'],
     ['Risk-Free Rate', 'Period-average RBI Repo Rate (monthly lookup)'],
     ['Sharpe Formula', '(CAGR − Avg RFR) ÷ Annualised Volatility'],
-    ['Current Value',  'Units Held × Base NAV'],
+    ['Current Value',  'Provided directly in Column B of input Excel (₹)'],
     ['Weight',         'Fund Current Value ÷ Total Portfolio Value × 100'],
   ]);
   XLSX.utils.book_append_sheet(wb, meta, 'Methodology');
